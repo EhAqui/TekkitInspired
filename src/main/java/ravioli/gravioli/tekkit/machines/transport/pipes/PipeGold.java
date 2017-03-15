@@ -12,24 +12,29 @@ import ravioli.gravioli.tekkit.machines.transport.PipeTransportGeneric;
 
 import java.util.List;
 
-public class PipeGold extends Pipe {
-    public PipeGold(Tekkit plugin) {
+public class PipeGold extends Pipe
+{
+    public PipeGold(Tekkit plugin)
+    {
         super(plugin, new PipeTransportGeneric());
     }
 
     @Override
-    public void runMachine() {
+    public void runMachine()
+    {
         transport.update();
     }
 
     @Override
-    public void onEnable() {
+    public void onEnable()
+    {
         updateTask(2);
         getWorld().getNearbyEntities(getLocation(), 2.0, 2.0, 2.0).stream().filter(entity -> entity instanceof ArmorStand && !entity.hasMetadata("display") && ((ArmorStand) entity).isMarker()).forEach(entity -> entity.remove());
     }
 
     @Override
-    public Recipe getRecipe() {
+    public Recipe getRecipe()
+    {
         ItemStack item = new ItemStack(Material.STAINED_GLASS, 1, (byte) 4);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.YELLOW + "Golden Pipe");
@@ -44,17 +49,20 @@ public class PipeGold extends Pipe {
     }
 
     @Override
-    public String getTableName() {
+    public String getTableName()
+    {
         return "GoldPipe";
     }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return "goldenpipe";
     }
 
     @Override
-    public double getSpeed() {
+    public double getSpeed()
+    {
         return 0.15;
     }
 }

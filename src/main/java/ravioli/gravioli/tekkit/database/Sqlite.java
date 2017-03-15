@@ -9,63 +9,83 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.sql.*;
 
-public class Sqlite {
+public class Sqlite
+{
     private Tekkit plugin;
     private Connection connection;
 
-    public Sqlite(Tekkit plugin) {
+    public Sqlite(Tekkit plugin)
+    {
         this.plugin = plugin;
         initialize();
     }
 
-    private void initialize() {
+    private void initialize()
+    {
         plugin.getDataFolder().mkdir();
         connection = createConnection();
     }
 
-    public synchronized Connection getConnection() {
-        try {
-            if (connection == null || connection.isClosed()) {
+    public synchronized Connection getConnection()
+    {
+        try
+        {
+            if (connection == null || connection.isClosed())
+            {
                 connection = createConnection();
             }
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             e.printStackTrace();
         }
         return connection;
     }
 
-    public Connection createConnection() {
+    public Connection createConnection()
+    {
         Connection connection = null;
-        try {
+        try
+        {
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + File.separator + "tekkit.db");
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException | ClassNotFoundException e)
+        {
             e.printStackTrace();
         }
         return connection;
     }
 
-    public void createTable(Machine machine) {
+    public void createTable(Machine machine)
+    {
         String sql = "CREATE TABLE IF NOT EXISTS `" + machine.getTableName() + "`(id INTEGER PRIMARY KEY AUTOINCREMENT";
-        for (Field field : CommonUtils.getAllFields(machine.getClass())) {
-            if (field.getAnnotation(DatabaseObject.class) != null) {
+        for (Field field : CommonUtils.getAllFields(machine.getClass()))
+        {
+            if (field.getAnnotation(DatabaseObject.class) != null)
+            {
                 Class type = field.getType();
 
                 String rowType = "TEXT NOT NULL";
-                if (type.isAssignableFrom(Integer.TYPE)) {
+                if (type.isAssignableFrom(Integer.TYPE))
+                {
                     rowType = "INT NOT NULL";
-                } else if (type.isAssignableFrom(Long.TYPE)) {
+                }
+                else if (type.isAssignableFrom(Long.TYPE))
+                {
                     rowType = "INTEGER NOT NULL";
-                } else if (type.isAssignableFrom(Boolean.TYPE)) {
+                }
+                else if (type.isAssignableFrom(Boolean.TYPE))
+                {
                     rowType = "BOOLEAN DEFAULT";
                 }
-                sql += ", `" + field.getName()  + "` " + rowType;
+                sql += ", `" + field.getName() + "` " + rowType;
             }
         }
         sql += ")";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = connection.prepareStatement(sql))
+        {
             statement.executeUpdate();
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             e.printStackTrace();
         }
     }
@@ -76,13 +96,17 @@ public class Sqlite {
      *
      * @param machine the machine type to be loaded
      */
-    public void preloadMachines(Machine machine) {
-        try (PreparedStatement statement = this.connection.prepareStatement("SELECT * FROM `" + machine.getTableName() + "`")) {
+    public void preloadMachines(Machine machine)
+    {
+        try (PreparedStatement statement = this.connection.prepareStatement("SELECT * FROM `" + machine.getTableName() + "`"))
+        {
             ResultSet results = statement.executeQuery();
-            while (results.next()) {
+            while (results.next())
+            {
                 machine.getClass().getConstructor(Tekkit.class).newInstance(plugin).preload(results);
             }
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
@@ -92,18 +116,22 @@ public class Sqlite {
      *
      * @param machine the machine to load
      */
-    public void loadMachine(Machine machine) {
-        try (PreparedStatement statement = this.connection.prepareStatement("SELECT * FROM `" + machine.getTableName() + "` WHERE `id` = ?")) {
+    public void loadMachine(Machine machine)
+    {
+        try (PreparedStatement statement = this.connection.prepareStatement("SELECT * FROM `" + machine.getTableName() + "` WHERE `id` = ?"))
+        {
             statement.setInt(1, machine.getId());
             ResultSet results = statement.executeQuery();
 
             machine.load(results);
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
 
-    public void runAsync(Runnable runnable) {
+    public void runAsync(Runnable runnable)
+    {
         this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, runnable);
     }
 }

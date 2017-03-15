@@ -2,9 +2,12 @@ package ravioli.gravioli.tekkit.machines.utils;
 
 import org.bukkit.Material;
 
-public class MachineUtils {
-    public static boolean isFuelSource(Material type) {
-        switch (type) {
+public class MachineUtils
+{
+    public static boolean isFuelSource(Material type)
+    {
+        switch (type)
+        {
             case LAVA_BUCKET:
             case COAL_BLOCK:
             case BLAZE_ROD:
@@ -45,8 +48,10 @@ public class MachineUtils {
         return false;
     }
 
-    public static boolean isSmeltable(Material type) {
-        switch (type) {
+    public static boolean isSmeltable(Material type)
+    {
+        switch (type)
+        {
             case PORK:
             case RAW_BEEF:
             case RAW_CHICKEN:

@@ -15,11 +15,13 @@ import ravioli.gravioli.tekkit.utils.InventoryUtils;
 
 import java.util.List;
 
-public abstract class MachineWithInventory extends Machine {
+public abstract class MachineWithInventory extends Machine
+{
     @DatabaseObject
     private Inventory inventory;
 
-    public MachineWithInventory(Tekkit plugin, String name, int size) {
+    public MachineWithInventory(Tekkit plugin, String name, int size)
+    {
         super(plugin);
         inventory = Bukkit.createInventory(null, size, name);
     }
@@ -30,7 +32,8 @@ public abstract class MachineWithInventory extends Machine {
      * @return the machines drops
      */
     @Override
-    public List<ItemStack> getDrops() {
+    public List<ItemStack> getDrops()
+    {
         return InventoryUtils.getNonNullInventoryContents(inventory);
     }
 
@@ -39,16 +42,20 @@ public abstract class MachineWithInventory extends Machine {
      *
      * @return the machines inventory
      */
-    public Inventory getInventory() {
+    public Inventory getInventory()
+    {
         return inventory;
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+    public void onPlayerInteract(PlayerInteractEvent event)
+    {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
+        {
             ItemStack item = event.getItem();
             Block block = event.getClickedBlock();
-            if (event.getClickedBlock() != null && event.getClickedBlock().getLocation().equals(this.getLocation()) && (item == null || item != null && !item.getType().isBlock() && item.getType() != Material.REDSTONE || !event.getPlayer().isSneaking())) {
+            if (event.getClickedBlock() != null && event.getClickedBlock().getLocation().equals(this.getLocation()) && (item == null || item != null && !item.getType().isBlock() && item.getType() != Material.REDSTONE || !event.getPlayer().isSneaking()))
+            {
                 event.setCancelled(true);
                 event.getPlayer().openInventory(inventory);
             }
@@ -56,8 +63,10 @@ public abstract class MachineWithInventory extends Machine {
     }
 
     @EventHandler
-    public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.getInventory().equals(inventory)) {
+    public void onInventoryDrag(InventoryDragEvent event)
+    {
+        if (event.getInventory().equals(inventory))
+        {
             event.setCancelled(true);
         }
     }

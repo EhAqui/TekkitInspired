@@ -8,30 +8,39 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public class AutoEquipTask implements Runnable {
+public class AutoEquipTask implements Runnable
+{
     private UUID uniqueId;
     private ItemStack toReplace;
     private EquipmentSlot hand;
 
-    public AutoEquipTask(Player player, ItemStack toReplace, EquipmentSlot hand) {
+    public AutoEquipTask(Player player, ItemStack toReplace, EquipmentSlot hand)
+    {
         uniqueId = player.getUniqueId();
         this.toReplace = toReplace;
         this.hand = hand;
     }
 
     @Override
-    public void run() {
+    public void run()
+    {
         Player player = Bukkit.getPlayer(uniqueId);
-        if (player != null) {
-            for (ItemStack item : player.getInventory().getContents()) {
-                if (item != null) {
-                    if (item.isSimilar(toReplace)) {
+        if (player != null)
+        {
+            for (ItemStack item : player.getInventory().getContents())
+            {
+                if (item != null)
+                {
+                    if (item.isSimilar(toReplace))
+                    {
                         boolean empty = player.getInventory().getItemInMainHand().getType() == Material.AIR;
-                        if (!empty) {
+                        if (!empty)
+                        {
                             break;
                         }
                         player.getInventory().removeItem(item);
-                        if (hand == EquipmentSlot.HAND) {
+                        if (hand == EquipmentSlot.HAND)
+                        {
                             player.getInventory().setItemInMainHand(item);
                             break;
                         }

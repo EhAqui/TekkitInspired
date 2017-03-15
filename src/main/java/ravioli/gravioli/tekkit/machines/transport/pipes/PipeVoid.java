@@ -12,24 +12,29 @@ import ravioli.gravioli.tekkit.Tekkit;
 import ravioli.gravioli.tekkit.machines.transport.MovingItem;
 import ravioli.gravioli.tekkit.machines.transport.PipeTransportGeneric;
 
-public class PipeVoid extends Pipe {
-    public PipeVoid(Tekkit plugin) {
+public class PipeVoid extends Pipe
+{
+    public PipeVoid(Tekkit plugin)
+    {
         super(plugin, new PipeTransportGeneric());
     }
 
     @Override
-    public void runMachine() {
+    public void runMachine()
+    {
         transport.update();
     }
 
     @Override
-    public void onEnable() {
+    public void onEnable()
+    {
         updateTask(1);
         getWorld().getNearbyEntities(getLocation(), 2.0, 2.0, 2.0).stream().filter(entity -> entity instanceof ArmorStand && !entity.hasMetadata("display") && ((ArmorStand) entity).isMarker()).forEach(entity -> entity.remove());
     }
 
     @Override
-    public Recipe getRecipe() {
+    public Recipe getRecipe()
+    {
         ItemStack item = new ItemStack(Material.STAINED_GLASS, 1, (byte) 10);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.YELLOW + "Void Pipe");
@@ -44,22 +49,26 @@ public class PipeVoid extends Pipe {
     }
 
     @Override
-    public String getTableName() {
+    public String getTableName()
+    {
         return "VoidPipe";
     }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return "voidpipe";
     }
 
     @Override
-    public double getSpeed() {
+    public double getSpeed()
+    {
         return 0.15;
     }
 
     @Override
-    public void addItem(MovingItem item, BlockFace input) {
+    public void addItem(MovingItem item, BlockFace input)
+    {
         item.destroy();
     }
 }

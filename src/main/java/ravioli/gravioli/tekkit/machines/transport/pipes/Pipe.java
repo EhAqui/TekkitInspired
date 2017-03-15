@@ -13,51 +13,61 @@ import ravioli.gravioli.tekkit.machines.transport.TransportReceiver;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Pipe extends Machine implements TransportReceiver {
+public abstract class Pipe extends Machine implements TransportReceiver
+{
+    protected PipeTransport transport;
     @DatabaseObject
     private MovingItemSet itemSet = new MovingItemSet();
-    protected PipeTransport transport;
 
-    public Pipe(Tekkit plugin, PipeTransport transport) {
+    public Pipe(Tekkit plugin, PipeTransport transport)
+    {
         super(plugin);
 
         this.transport = transport;
         transport.container = this;
 
-        for (int i = 0; i < BlockFace.values().length; i++) {
+        for (int i = 0; i < BlockFace.values().length; i++)
+        {
             BlockFace face = BlockFace.values()[i];
-            if (!face.name().contains("_") && face != BlockFace.SELF) {
+            if (!face.name().contains("_") && face != BlockFace.SELF)
+            {
                 this.acceptableInputs[i] = true;
                 this.acceptableOutputs[i] = true;
             }
         }
     }
 
-    public void addItem(MovingItem item, BlockFace input) {
+    public void addItem(MovingItem item, BlockFace input)
+    {
         transport.addItem(item, input);
     }
 
-    public MovingItemSet getItemSet() {
+    public MovingItemSet getItemSet()
+    {
         return itemSet;
     }
 
     @Override
-    public boolean canReceiveItem(MovingItem item, BlockFace input) {
+    public boolean canReceiveItem(MovingItem item, BlockFace input)
+    {
         return acceptableInput(input);
     }
 
     @Override
-    public void addMovingItem(MovingItem item, BlockFace input) {
+    public void addMovingItem(MovingItem item, BlockFace input)
+    {
         addItem(item, input);
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         transport.destroy();
     }
 
     @Override
-    public List<ItemStack> getDrops() {
+    public List<ItemStack> getDrops()
+    {
         return new ArrayList();
     }
 

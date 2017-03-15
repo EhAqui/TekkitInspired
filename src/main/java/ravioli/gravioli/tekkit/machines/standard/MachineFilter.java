@@ -21,29 +21,36 @@ import ravioli.gravioli.tekkit.utils.InventoryUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MachineFilter extends MachineWithInventory implements TransportReceiver {
-    public MachineFilter(Tekkit plugin) {
+public class MachineFilter extends MachineWithInventory implements TransportReceiver
+{
+    public MachineFilter(Tekkit plugin)
+    {
         super(plugin, "Filter Items", 9);
     }
 
     @Override
-    public boolean canReceiveItem(MovingItem item, BlockFace input) {
+    public boolean canReceiveItem(MovingItem item, BlockFace input)
+    {
         return acceptableInput(input) && canTransport(item.getItemStack());
     }
 
     @Override
-    public void addMovingItem(MovingItem item, BlockFace input) {
+    public void addMovingItem(MovingItem item, BlockFace input)
+    {
         addItem(item.getItemStack(), input);
     }
 
-    public void addItem(ItemStack item, BlockFace input) {
-        if (canTransport(item)) {
+    public void addItem(ItemStack item, BlockFace input)
+    {
+        if (canTransport(item))
+        {
             routeItem(input.getOppositeFace(), item);
         }
     }
 
     @Override
-    public void onCreate() {
+    public void onCreate()
+    {
         Dispenser block = (Dispenser) getLocation().getBlock().getState();
         block.getInventory().setItem(4, new ItemStack(Material.PAPER));
 
@@ -56,12 +63,16 @@ public class MachineFilter extends MachineWithInventory implements TransportRece
     }
 
     @Override
-    public List<ItemStack> getDrops() {
+    public List<ItemStack> getDrops()
+    {
         List<ItemStack> drops = new ArrayList();
-        for (int i = 0; i < getInventory().getSize(); i++) {
-            if (i != 8) {
+        for (int i = 0; i < getInventory().getSize(); i++)
+        {
+            if (i != 8)
+            {
                 ItemStack item = getInventory().getItem(i);
-                if (item != null) {
+                if (item != null)
+                {
                     drops.add(item);
                 }
             }
@@ -70,14 +81,16 @@ public class MachineFilter extends MachineWithInventory implements TransportRece
     }
 
     @Override
-    public void onEnable() {
+    public void onEnable()
+    {
         org.bukkit.material.Dispenser dispenser = (org.bukkit.material.Dispenser) getBlock().getState().getData();
         acceptableInputs[dispenser.getFacing().getOppositeFace().ordinal()] = true;
         acceptableOutputs[dispenser.getFacing().ordinal()] = true;
     }
 
     @Override
-    public void runMachine() {
+    public void runMachine()
+    {
         org.bukkit.material.Dispenser dispenser = (org.bukkit.material.Dispenser) getBlock().getState().getData();
 
         Block input = getBlock().getRelative(dispenser.getFacing().getOppositeFace());
@@ -86,38 +99,52 @@ public class MachineFilter extends MachineWithInventory implements TransportRece
         Machine machine = MachinesManager.getMachineByLocation(input.getLocation());
 
         Inventory outputInventory = null;
-        if (output.getState() instanceof InventoryHolder) {
+        if (output.getState() instanceof InventoryHolder)
+        {
             InventoryHolder inventoryHolder = (InventoryHolder) output.getState();
             outputInventory = inventoryHolder.getInventory();
 
             Machine outputMachine = MachinesManager.getMachineByLocation(output.getLocation());
-            if (outputMachine != null && outputMachine instanceof MachineWithInventory && outputMachine.acceptableInput(dispenser.getFacing())) {
+            if (outputMachine != null && outputMachine instanceof MachineWithInventory && outputMachine.acceptableInput(dispenser.getFacing()))
+            {
                 outputInventory = ((MachineWithInventory) outputMachine).getInventory();
             }
         }
 
         Inventory inputInventory = null;
-        if (machine != null) {
-            if (machine.acceptableOutput(dispenser.getFacing())) {
-                if (machine instanceof MachineWithInventory) {
+        if (machine != null)
+        {
+            if (machine.acceptableOutput(dispenser.getFacing()))
+            {
+                if (machine instanceof MachineWithInventory)
+                {
                     MachineWithInventory inventoryMachine = (MachineWithInventory) machine;
                     inputInventory = inventoryMachine.getInventory();
                 }
             }
-        } else {
-            if (input.getState() instanceof InventoryHolder) {
+        }
+        else
+        {
+            if (input.getState() instanceof InventoryHolder)
+            {
                 InventoryHolder inventoryHolder = (InventoryHolder) input.getState();
                 inputInventory = inventoryHolder.getInventory();
             }
         }
 
-        if (inputInventory != null) {
-            if (!InventoryUtils.isInventoryEmpty(inputInventory)) {
+        if (inputInventory != null)
+        {
+            if (!InventoryUtils.isInventoryEmpty(inputInventory))
+            {
                 ItemStack itemStack = null;
-                for (ItemStack item : inputInventory.getContents()) {
-                    if (item != null) {
-                        if (canTransport(item)) {
-                            if (outputInventory != null && !InventoryUtils.canFitIntoInventory(outputInventory, item)) {
+                for (ItemStack item : inputInventory.getContents())
+                {
+                    if (item != null)
+                    {
+                        if (canTransport(item))
+                        {
+                            if (outputInventory != null && !InventoryUtils.canFitIntoInventory(outputInventory, item))
+                            {
                                 continue;
                             }
                             itemStack = item;
@@ -125,7 +152,8 @@ public class MachineFilter extends MachineWithInventory implements TransportRece
                         }
                     }
                 }
-                if (itemStack != null) {
+                if (itemStack != null)
+                {
                     routeItem(dispenser.getFacing(), itemStack);
                     inputInventory.removeItem(itemStack);
                 }
@@ -133,19 +161,25 @@ public class MachineFilter extends MachineWithInventory implements TransportRece
         }
     }
 
-    public boolean canTransport(ItemStack item) {
+    public boolean canTransport(ItemStack item)
+    {
         ItemStack check = getInventory().getItem(8);
-        if (check.getDurability() == 0) {
+        if (check.getDurability() == 0)
+        {
             return isWhitelisted(item);
         }
         return !isWhitelisted(item);
     }
 
-    public boolean isWhitelisted(ItemStack item) {
-        for (int i = 0; i < getInventory().getSize(); i++) {
-            if (i != 8) {
+    public boolean isWhitelisted(ItemStack item)
+    {
+        for (int i = 0; i < getInventory().getSize(); i++)
+        {
+            if (i != 8)
+            {
                 ItemStack itemStack = getInventory().getItem(i);
-                if (itemStack != null && item.isSimilar(itemStack)) {
+                if (itemStack != null && item.isSimilar(itemStack))
+                {
                     return true;
                 }
             }
@@ -154,7 +188,8 @@ public class MachineFilter extends MachineWithInventory implements TransportRece
     }
 
     @Override
-    public Recipe getRecipe() {
+    public Recipe getRecipe()
+    {
         ItemStack item = new ItemStack(Material.DISPENSER);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.YELLOW + "Filter");
@@ -171,31 +206,40 @@ public class MachineFilter extends MachineWithInventory implements TransportRece
     }
 
     @Override
-    public String getTableName() {
+    public String getTableName()
+    {
         return "Filter";
     }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return "filter";
     }
 
     @EventHandler
-    public void onDispenserActivate(BlockDispenseEvent event) {
+    public void onDispenserActivate(BlockDispenseEvent event)
+    {
         Block block = event.getBlock();
-        if (block.getLocation().equals(getLocation())) {
+        if (block.getLocation().equals(getLocation()))
+        {
             event.setCancelled(true);
             run();
         }
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getInventory().equals(getInventory()) && event.getSlot() == event.getRawSlot() && event.getSlot() == 8) {
+    public void onInventoryClick(InventoryClickEvent event)
+    {
+        if (event.getInventory().equals(getInventory()) && event.getSlot() == event.getRawSlot() && event.getSlot() == 8)
+        {
             ItemStack check = getInventory().getItem(8);
-            if (check.getDurability() == 0) {
+            if (check.getDurability() == 0)
+            {
                 check.setDurability((short) 15);
-            } else {
+            }
+            else
+            {
                 check.setDurability((short) 0);
             }
             event.setCancelled(true);

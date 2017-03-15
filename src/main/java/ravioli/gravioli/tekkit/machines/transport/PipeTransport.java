@@ -7,7 +7,8 @@ import ravioli.gravioli.tekkit.machines.transport.pipes.Pipe;
 
 import java.util.ArrayList;
 
-public abstract class PipeTransport {
+public abstract class PipeTransport
+{
     public Pipe container;
 
     public abstract void addItem(MovingItem item, BlockFace input);
@@ -18,7 +19,8 @@ public abstract class PipeTransport {
 
     public abstract void destroy();
 
-    public World getWorld() {
+    public World getWorld()
+    {
         return container.getWorld();
     }
 }

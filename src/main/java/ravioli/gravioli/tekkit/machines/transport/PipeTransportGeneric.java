@@ -12,33 +12,40 @@ import ravioli.gravioli.tekkit.utils.CommonUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PipeTransportGeneric extends PipeTransport {
+public class PipeTransportGeneric extends PipeTransport
+{
     private List<BlockFace> faces = new ArrayList(Arrays.asList(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN));
 
     @Override
-    public void addItem(MovingItem item, BlockFace input) {
+    public void addItem(MovingItem item, BlockFace input)
+    {
         getItemSet().add(item);
 
         item.input = input;
         item.output = getDestination(item);
         item.moveToInputStart(container.getLocation());
 
-        if (item.output == null) {
+        if (item.output == null)
+        {
             item.output = input.getOppositeFace();
         }
     }
 
     @Override
-    public ArrayList<ItemStack> getDrops() {
+    public ArrayList<ItemStack> getDrops()
+    {
         return getItemSet().stream().map(MovingItem::getItemStack).collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
-    public void update() {
+    public void update()
+    {
         Iterator iterator = getItemSet().iterator();
-        while (iterator.hasNext()) {
+        while (iterator.hasNext())
+        {
             MovingItem item = (MovingItem) iterator.next();
-            if (item.output == null) {
+            if (item.output == null)
+            {
                 continue;
             }
             Location mid = container.getLocation().clone().add(0.5, 0.5, 0.5);
@@ -56,17 +63,20 @@ public class PipeTransportGeneric extends PipeTransport {
             CommonUtils.normalizeLocation(location);
 
             item.moveTo(location);
-            if (mid.distance(location) < 0.1 && !item.reachedCenter) {
+            if (mid.distance(location) < 0.1 && !item.reachedCenter)
+            {
                 item.reachedCenter = true;
                 CommonUtils.normalizeLocation(location, 2.0);
             }
-            if ((endReached(item) || outOfBounds(item)) && item.reachedCenter) {
+            if ((endReached(item) || outOfBounds(item)) && item.reachedCenter)
+            {
                 iterator.remove();
 
                 Block block = container.getBlock().getRelative(item.output);
                 boolean success = injectItem(item, block);
 
-                if (!success) {
+                if (!success)
+                {
                     item.destroy();
                     block.getWorld().dropItemNaturally(location, item.getItemStack());
                 }
@@ -75,19 +85,25 @@ public class PipeTransportGeneric extends PipeTransport {
     }
 
     @Override
-    public void destroy() {
+    public void destroy()
+    {
         getItemSet().forEach(MovingItem::destroy);
     }
 
-    private boolean injectItem(MovingItem item, Block block) {
+    private boolean injectItem(MovingItem item, Block block)
+    {
         ItemStack itemStack = item.getItemStack();
 
         Machine machine = MachinesManager.getMachineByLocation(block.getLocation());
-        if (machine != null) {
-            if (machine instanceof Pipe) {
+        if (machine != null)
+        {
+            if (machine instanceof Pipe)
+            {
                 passItem(item, (Pipe) machine);
                 return true;
-            } else if (machine instanceof TransportReceiver) {
+            }
+            else if (machine instanceof TransportReceiver)
+            {
                 TransportReceiver receiver = (TransportReceiver) machine;
                 receiver.addMovingItem(item, item.output.getOppositeFace());
                 item.destroy();
@@ -96,30 +112,39 @@ public class PipeTransportGeneric extends PipeTransport {
             return false;
         }
 
-        if (block.getState() instanceof InventoryHolder) {
+        if (block.getState() instanceof InventoryHolder)
+        {
             InventoryHolder inventoryBlock = (InventoryHolder) block.getState();
 
-            if (inventoryBlock instanceof Hopper || inventoryBlock instanceof BrewingStand || inventoryBlock instanceof Beacon) {
+            if (inventoryBlock instanceof Hopper || inventoryBlock instanceof BrewingStand || inventoryBlock instanceof Beacon)
+            {
                 return false;
             }
 
-            if (inventoryBlock instanceof Furnace) {
+            if (inventoryBlock instanceof Furnace)
+            {
                 Furnace furnace = (Furnace) inventoryBlock;
 
                 ItemStack furnaceItem = null;
                 Boolean smelting = null;
 
-                if (item.output == BlockFace.UP) {
+                if (item.output == BlockFace.UP)
+                {
                     furnaceItem = furnace.getInventory().getFuel();
                     smelting = false;
-                } else if (item.output == BlockFace.DOWN) {
+                }
+                else if (item.output == BlockFace.DOWN)
+                {
                     furnaceItem = furnace.getInventory().getSmelting();
                     smelting = true;
                 }
-                if (furnaceItem != null) {
-                    if (furnaceItem.isSimilar(itemStack)) {
+                if (furnaceItem != null)
+                {
+                    if (furnaceItem.isSimilar(itemStack))
+                    {
                         int total = furnaceItem.getAmount() + itemStack.getAmount();
-                        if (total <= furnaceItem.getMaxStackSize()) {
+                        if (total <= furnaceItem.getMaxStackSize())
+                        {
                             furnaceItem.setAmount(total);
                             item.destroy();
                             return true;
@@ -128,18 +153,26 @@ public class PipeTransportGeneric extends PipeTransport {
                         itemStack.setAmount(total - furnaceItem.getMaxStackSize());
                         return false;
                     }
-                } else if (smelting != null) {
-                    if (smelting) {
+                }
+                else if (smelting != null)
+                {
+                    if (smelting)
+                    {
                         furnace.getInventory().setSmelting(itemStack);
-                    } else {
+                    }
+                    else
+                    {
                         furnace.getInventory().setFuel(itemStack);
                     }
                     item.destroy();
                     return true;
                 }
-            } else {
+            }
+            else
+            {
                 ItemStack leftover = inventoryBlock.getInventory().addItem(itemStack).get(0);
-                if (leftover == null) {
+                if (leftover == null)
+                {
                     item.destroy();
                     return true;
                 }
@@ -149,24 +182,30 @@ public class PipeTransportGeneric extends PipeTransport {
         return false;
     }
 
-    private void passItem(MovingItem item, Pipe pipe) {
+    private void passItem(MovingItem item, Pipe pipe)
+    {
         BlockFace input = item.output.getOppositeFace();
         item.reset();
         pipe.addItem(item, input);
     }
 
-    public BlockFace getDestination(MovingItem item) {
+    public BlockFace getDestination(MovingItem item)
+    {
         List<BlockFace> results = new ArrayList();
 
-        for (BlockFace face : faces) {
-            if (container.acceptableOutput(face) && face != item.input) {
+        for (BlockFace face : faces)
+        {
+            if (container.acceptableOutput(face) && face != item.input)
+            {
                 Block block = container.getBlock().getRelative(face);
-                if (item.canInsertItem(block, face.getOppositeFace())) {
+                if (item.canInsertItem(block, face.getOppositeFace()))
+                {
                     results.add(face);
                 }
             }
         }
-        if (results.isEmpty()) {
+        if (results.isEmpty())
+        {
             return null;
         }
         BlockFace result = results.get(0);
@@ -175,18 +214,21 @@ public class PipeTransportGeneric extends PipeTransport {
         return result;
     }
 
-    public MovingItemSet getItemSet() {
+    public MovingItemSet getItemSet()
+    {
         return container.getItemSet();
     }
 
-    private boolean endReached(MovingItem item) {
+    private boolean endReached(MovingItem item)
+    {
         Location destination = this.container.getLocation().clone().add(0.5, 0.5, 0.5);
         destination.add(item.output.getModX() * 0.5, item.output.getModY() * 0.5, item.output.getModZ() * 0.5);
         CommonUtils.normalizeLocation(destination);
         return item.getLocation().distance(destination) < 0.01;
     }
 
-    private boolean outOfBounds(MovingItem item) {
+    private boolean outOfBounds(MovingItem item)
+    {
         Location mid = this.container.getLocation().clone().add(0.5, 0.5, 0.5);
         CommonUtils.normalizeLocation(mid, 2.0);
         return item.getLocation().distance(mid) > 0.6;

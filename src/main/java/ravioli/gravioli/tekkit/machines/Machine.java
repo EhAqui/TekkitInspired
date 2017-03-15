@@ -33,23 +33,22 @@ import java.util.*;
 /**
  * Represents a machine
  */
-public abstract class Machine implements Listener, Runnable {
+public abstract class Machine implements Listener, Runnable
+{
+    protected boolean[] acceptableInputs = new boolean[BlockFace.values().length];
+    protected boolean[] acceptableOutputs = new boolean[BlockFace.values().length];
     private Tekkit plugin;
-
     @DatabaseObject
     private Location location;
     @DatabaseObject
     private UUID owner;
-
     private String worldName;
     private int id = -1;
     private int task;
     private boolean loaded;
 
-    protected boolean[] acceptableInputs = new boolean[BlockFace.values().length];
-    protected boolean[] acceptableOutputs = new boolean[BlockFace.values().length];
-
-    public Machine(Tekkit plugin) {
+    public Machine(Tekkit plugin)
+    {
         this.plugin = plugin;
     }
 
@@ -58,7 +57,8 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @return Tekkit plugin
      */
-    public Tekkit getPlugin() {
+    public Tekkit getPlugin()
+    {
         return plugin;
     }
 
@@ -68,7 +68,8 @@ public abstract class Machine implements Listener, Runnable {
      * @param face block face to check
      * @return whether the machine can accept items from that face
      */
-    public boolean acceptableInput(BlockFace face) {
+    public boolean acceptableInput(BlockFace face)
+    {
         return this.acceptableInputs[face.ordinal()];
     }
 
@@ -78,7 +79,8 @@ public abstract class Machine implements Listener, Runnable {
      * @param face block face to check
      * @return whether the machine outputs blocks from that face
      */
-    public boolean acceptableOutput(BlockFace face) {
+    public boolean acceptableOutput(BlockFace face)
+    {
         return this.acceptableOutputs[face.ordinal()];
     }
 
@@ -87,7 +89,8 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @return if the machine is loaded or not
      */
-    public boolean isLoaded() {
+    public boolean isLoaded()
+    {
         return this.loaded;
     }
 
@@ -96,7 +99,8 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @return the owners uuid
      */
-    public UUID getOwner() {
+    public UUID getOwner()
+    {
         return owner;
     }
 
@@ -105,7 +109,8 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @return the machine's id
      */
-    public int getId() {
+    public int getId()
+    {
         return id;
     }
 
@@ -115,15 +120,18 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @return the machine's world
      */
-    public String getWorldName() {
+    public String getWorldName()
+    {
         return worldName;
     }
 
     /**
      * Saves the machine to the database asynchronously
      */
-    public void saveAsync() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+    public void saveAsync()
+    {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
+        {
             save();
         });
     }
@@ -131,7 +139,8 @@ public abstract class Machine implements Listener, Runnable {
     /**
      * Saves the machine to the database
      */
-    public void save() {
+    public void save()
+    {
         boolean inserting = id == -1;
         String sql = inserting ?
                 "INSERT INTO `" + getTableName() + "` (" :
@@ -140,8 +149,10 @@ public abstract class Machine implements Listener, Runnable {
         LinkedHashMap<String, Field> types = new LinkedHashMap<String, Field>();
         HashMap<String, Boolean> fieldAccessibility = new HashMap<String, Boolean>();
 
-        for (Field field : CommonUtils.getAllFields(getClass())) {
-            if (field.getAnnotation(DatabaseObject.class) == null) {
+        for (Field field : CommonUtils.getAllFields(getClass()))
+        {
+            if (field.getAnnotation(DatabaseObject.class) == null)
+            {
                 continue;
             }
             boolean accessibility = field.isAccessible();
@@ -155,21 +166,27 @@ public abstract class Machine implements Listener, Runnable {
                     "`" + name + "`, " :
                     " `" + name + "` = ?,";
         }
-        if (inserting) {
+        if (inserting)
+        {
             sql = sql.substring(0, sql.length() - 2) + ") VALUES (";
-            for (int i = 0; i < types.size(); i++) {
+            for (int i = 0; i < types.size(); i++)
+            {
                 sql += "?, ";
             }
             sql = sql.substring(0, sql.length() - 2) + ")";
-        } else {
+        }
+        else
+        {
             sql = sql.substring(0, sql.length() - 1) + " WHERE `id` = ?";
         }
 
         int count = 1;
         try (PreparedStatement statement = inserting ?
                 plugin.getSqlite().getConnection().prepareStatement(sql, new String[]{"id"}) :
-                plugin.getSqlite().getConnection().prepareStatement(sql)) {
-            for (Map.Entry<String, Field> entry : types.entrySet()) {
+                plugin.getSqlite().getConnection().prepareStatement(sql))
+        {
+            for (Map.Entry<String, Field> entry : types.entrySet())
+            {
                 String name = entry.getKey();
                 Field field = entry.getValue();
 
@@ -177,38 +194,51 @@ public abstract class Machine implements Listener, Runnable {
                 Object object = field.get(this);
 
                 boolean serializableInterface = false;
-                for (Class c : type.getInterfaces()) {
-                    if (c.equals(DatabaseSerializable.class)) {
+                for (Class c : type.getInterfaces())
+                {
+                    if (c.equals(DatabaseSerializable.class))
+                    {
                         serializableInterface = true;
                         break;
                     }
                 }
-                if (type.isPrimitive()) {
+                if (type.isPrimitive())
+                {
                     statement.setObject(count, object);
-                } else if (serializableInterface) {
+                }
+                else if (serializableInterface)
+                {
                     statement.setString(count, (String) object.getClass().getMethod(
                             "serialize").invoke(object));
-                } else if (MachinesManager.hasSerializer(type)) {
+                }
+                else if (MachinesManager.hasSerializer(type))
+                {
                     statement.setString(count, MachinesManager.getSerializer(type).serialize(object));
-                } else if (type.isEnum()) {
+                }
+                else if (type.isEnum())
+                {
                     statement.setString(count, object.toString());
                 }
                 count++;
 
                 field.setAccessible(fieldAccessibility.get(name));
             }
-            if (!inserting) {
+            if (!inserting)
+            {
                 statement.setInt(count, id);
             }
             statement.executeUpdate();
 
-            if (inserting) {
+            if (inserting)
+            {
                 ResultSet results = statement.getGeneratedKeys();
-                if (results.next()) {
+                if (results.next())
+                {
                     id = results.getInt(1);
                 }
             }
-        } catch (SQLException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (SQLException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e)
+        {
             e.printStackTrace();
         }
     }
@@ -216,13 +246,17 @@ public abstract class Machine implements Listener, Runnable {
     /**
      * Loads basic information for the machine from the database
      */
-    public void preload(ResultSet results) throws SQLException {
+    public void preload(ResultSet results) throws SQLException
+    {
         id = results.getInt("id");
         worldName = results.getString("location").split(",")[0];
 
-        if (MachinesManager.unloadedMachines.containsKey(worldName)) {
+        if (MachinesManager.unloadedMachines.containsKey(worldName))
+        {
             MachinesManager.unloadedMachines.get(worldName).add(this);
-        } else {
+        }
+        else
+        {
             MachinesManager.unloadedMachines.put(worldName, new ArrayList());
             MachinesManager.unloadedMachines.get(worldName).add(this);
         }
@@ -231,10 +265,13 @@ public abstract class Machine implements Listener, Runnable {
     /**
      * Loads the machine from the database
      */
-    public void load(ResultSet results) throws SQLException, IllegalAccessException, IOException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException, InstantiationException {
-        for (Field field : CommonUtils.getAllFields(this.getClass())) {
+    public void load(ResultSet results) throws SQLException, IllegalAccessException, IOException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException, InstantiationException
+    {
+        for (Field field : CommonUtils.getAllFields(this.getClass()))
+        {
             DatabaseObject annotation = field.getAnnotation(DatabaseObject.class);
-            if (annotation == null) {
+            if (annotation == null)
+            {
                 continue;
             }
             boolean accessible = field.isAccessible();
@@ -243,15 +280,24 @@ public abstract class Machine implements Listener, Runnable {
             Class type = field.getType();
             String name = field.getName();
 
-            if (type.isPrimitive()) {
+            if (type.isPrimitive())
+            {
                 field.set(this, results.getObject(name));
-            } else if (type.isAssignableFrom(String.class)) {
+            }
+            else if (type.isAssignableFrom(String.class))
+            {
                 field.set(this, results.getString(name));
-            } else if (type.isAssignableFrom(DatabaseSerializable.class)) {
+            }
+            else if (type.isAssignableFrom(DatabaseSerializable.class))
+            {
                 field.set(this, field.get(this).getClass().getMethod("deserialize", String.class).invoke(null, results.getString(name)));
-            } else if (MachinesManager.hasSerializer(type)) {
+            }
+            else if (MachinesManager.hasSerializer(type))
+            {
                 field.set(this, MachinesManager.getSerializer(type).deserialize(results.getString(name)));
-            } else if (type.isEnum()) {
+            }
+            else if (type.isEnum())
+            {
                 field.set(this, Enum.valueOf(type, results.getString(name)));
             }
         }
@@ -262,12 +308,16 @@ public abstract class Machine implements Listener, Runnable {
      * Deletes the machine from the database
      * Machine deletion is always done asynchronously
      */
-    public void delete() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try (PreparedStatement statement = plugin.getSqlite().getConnection().prepareStatement("DELETE FROM `" + getTableName() + "` WHERE `id` = ?")) {
+    public void delete()
+    {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
+        {
+            try (PreparedStatement statement = plugin.getSqlite().getConnection().prepareStatement("DELETE FROM `" + getTableName() + "` WHERE `id` = ?"))
+            {
                 statement.setInt(1, id);
                 statement.executeUpdate();
-            } catch (SQLException e) {
+            } catch (SQLException e)
+            {
                 e.printStackTrace();
             }
         });
@@ -278,7 +328,8 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @param tickrate machines tickrate
      */
-    protected void updateTask(long tickrate) {
+    protected void updateTask(long tickrate)
+    {
         stopTask();
         task = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this, tickrate, tickrate);
     }
@@ -288,7 +339,8 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @param delay delay in ticks
      */
-    protected void startTaskLater(long delay) {
+    protected void startTaskLater(long delay)
+    {
         stopTask();
         task = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, this, delay);
     }
@@ -296,13 +348,16 @@ public abstract class Machine implements Listener, Runnable {
     /**
      * Stop the machines currently running task
      */
-    protected void stopTask() {
+    protected void stopTask()
+    {
         Bukkit.getScheduler().cancelTask(task);
     }
 
     @Override
-    public void run() {
-        if (getLocation().getChunk().isLoaded()) {
+    public void run()
+    {
+        if (getLocation().getChunk().isLoaded())
+        {
             runMachine();
         }
     }
@@ -310,7 +365,8 @@ public abstract class Machine implements Listener, Runnable {
     /**
      * Used to create a machine
      */
-    public void create(Player player, Location location) {
+    public void create(Player player, Location location)
+    {
         owner = player.getUniqueId();
         this.location = location;
         worldName = getWorld().getName();
@@ -322,7 +378,8 @@ public abstract class Machine implements Listener, Runnable {
     /**
      * Used to enable a machine
      */
-    public void enable() {
+    public void enable()
+    {
         plugin.registerListener(this);
         MachinesManager.addMachine(this);
 
@@ -335,13 +392,16 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @param drop whether or not the machine drops its items.
      */
-    public void destroy(boolean drop) {
-        if (drop) {
+    public void destroy(boolean drop)
+    {
+        if (drop)
+        {
             getDrops().forEach(item -> getWorld().dropItem(location, item));
             getWorld().dropItem(location, getRecipe().getResult());
         }
         // If the block the machine encompasses is an inventory block, clear it's inventory before breaking it
-        if (getBlock().getState() instanceof InventoryHolder) {
+        if (getBlock().getState() instanceof InventoryHolder)
+        {
             ((InventoryHolder) getBlock().getState()).getInventory().clear();
         }
         getBlock().setTypeIdAndData(0, (byte) 0, true);
@@ -351,47 +411,68 @@ public abstract class Machine implements Listener, Runnable {
         onDestroy();
 
         MachinesManager.removeMachine(this);
-        if (MachinesManager.markedForDelete.containsKey(worldName)) {
+        if (MachinesManager.markedForDelete.containsKey(worldName))
+        {
             MachinesManager.markedForDelete.get(worldName).add(this);
-        } else {
+        }
+        else
+        {
             MachinesManager.markedForDelete.put(worldName, new ArrayList());
             MachinesManager.markedForDelete.get(worldName).add(this);
         }
     }
 
-    protected void routeItem(BlockFace outputFace, ItemStack... items) {
+    protected void routeItem(BlockFace outputFace, ItemStack... items)
+    {
         Block output = this.getBlock().getRelative(outputFace);
         Machine machine = MachinesManager.getMachineByLocation(output.getLocation());
-        if (output.getState() instanceof InventoryHolder && machine == null) {
+        if (output.getState() instanceof InventoryHolder && machine == null)
+        {
             InventoryHolder holder = (InventoryHolder) output.getState();
             HashMap<Integer, ItemStack> drops = holder.getInventory().addItem(items);
             drops.forEach((k, v) -> getWorld().dropItemNaturally(location, v));
-        } else {
+        }
+        else
+        {
             List<ItemStack> drops = new ArrayList<ItemStack>();
-            if (machine instanceof Pipe) {
+            if (machine instanceof Pipe)
+            {
                 Pipe pipe = (Pipe) machine;
-                if (pipe.acceptableInput(outputFace.getOppositeFace())) {
-                    for (ItemStack item : items) {
+                if (pipe.acceptableInput(outputFace.getOppositeFace()))
+                {
+                    for (ItemStack item : items)
+                    {
                         MovingItem movingItem = new MovingItem(item, output.getLocation(), outputFace.getOppositeFace());
                         pipe.addItem(movingItem, outputFace.getOppositeFace());
                     }
-                } else {
+                }
+                else
+                {
                     drops.addAll(Arrays.asList(items));
                 }
-            } else if (machine instanceof MachineFilter) {
+            }
+            else if (machine instanceof MachineFilter)
+            {
                 MachineFilter filter = (MachineFilter) machine;
-                if (filter.acceptableInput(outputFace.getOppositeFace())) {
-                    for (ItemStack item : items) {
-                        if (filter.canTransport(item)) {
+                if (filter.acceptableInput(outputFace.getOppositeFace()))
+                {
+                    for (ItemStack item : items)
+                    {
+                        if (filter.canTransport(item))
+                        {
                             filter.addItem(item, outputFace.getOppositeFace());
                             continue;
                         }
                         drops.add(item);
                     }
-                } else {
+                }
+                else
+                {
                     drops.addAll(Arrays.asList(items));
                 }
-            } else {
+            }
+            else
+            {
                 drops.addAll(Arrays.asList(items));
             }
             drops.forEach(drop -> getWorld().dropItemNaturally(output.getLocation(), drop));
@@ -404,9 +485,11 @@ public abstract class Machine implements Listener, Runnable {
      * @param block block to check
      * @return the machine the block represents
      */
-    protected Machine checkBlockMachinePiece(Block block) {
+    protected Machine checkBlockMachinePiece(Block block)
+    {
         Object machine = block.getMetadata("machine").get(0).value();
-        if (block.hasMetadata("machine") && machine instanceof Machine) {
+        if (block.hasMetadata("machine") && machine instanceof Machine)
+        {
             return (Machine) machine;
         }
         return null;
@@ -417,7 +500,8 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @return the location the machine is at
      */
-    public Location getLocation() {
+    public Location getLocation()
+    {
         return location;
     }
 
@@ -426,7 +510,8 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @return the machines block
      */
-    public Block getBlock() {
+    public Block getBlock()
+    {
         return location.getBlock();
     }
 
@@ -435,7 +520,8 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @return the machine's world
      */
-    public World getWorld() {
+    public World getWorld()
+    {
         return location.getWorld();
     }
 
@@ -444,25 +530,29 @@ public abstract class Machine implements Listener, Runnable {
      *
      * @param block block being broken
      */
-    public void onMachinePieceBreak(Block block) {
+    public void onMachinePieceBreak(Block block)
+    {
     }
 
     /**
      * This method is called whenever a machine is created
      */
-    public void onCreate() {
+    public void onCreate()
+    {
     }
 
     /**
      * This method is called whenever a machine is loaded
      */
-    public void onEnable() {
+    public void onEnable()
+    {
     }
 
     /**
      * This method is called whenever a machine is destroyed
      */
-    public void onDestroy() {
+    public void onDestroy()
+    {
     }
 
     /**
@@ -505,8 +595,10 @@ public abstract class Machine implements Listener, Runnable {
      * @param event the block break event
      */
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
-        if (event.getBlock().getLocation().equals(location)) {
+    public void onBlockBreak(BlockBreakEvent event)
+    {
+        if (event.getBlock().getLocation().equals(location))
+        {
             this.destroy(true);
         }
     }

@@ -22,41 +22,53 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-public class MachineBlockBreaker extends Machine {
-    public MachineBlockBreaker(Tekkit plugin) {
+public class MachineBlockBreaker extends Machine
+{
+    public MachineBlockBreaker(Tekkit plugin)
+    {
         super(plugin);
     }
 
     @Override
-    public void onCreate() {
+    public void onCreate()
+    {
         org.bukkit.block.Dispenser block = (org.bukkit.block.Dispenser) this.getLocation().getBlock().getState();
         block.getInventory().setItem(4, new ItemStack(Material.PAPER));
     }
 
     @Override
-    public void runMachine() {
+    public void runMachine()
+    {
         Dispenser block = (Dispenser) getBlock().getState().getData();
         Block facing = getBlock().getRelative(block.getFacing());
 
-        if (facing.getType() != Material.AIR && facing.getType() != Material.BEDROCK && facing.getType() != Material.OBSIDIAN) {
+        if (facing.getType() != Material.AIR && facing.getType() != Material.BEDROCK && facing.getType() != Material.OBSIDIAN)
+        {
             HashSet<ItemStack> drops = new HashSet();
             Machine machineCheck = MachinesManager.getMachineByLocation(facing.getLocation());
-            if (machineCheck != null) {
+            if (machineCheck != null)
+            {
                 drops.addAll(machineCheck.getDrops());
                 drops.add(machineCheck.getRecipe().getResult());
                 machineCheck.destroy(false);
-            } else if (!facing.hasMetadata("machine")) {
+            }
+            else if (!facing.hasMetadata("machine"))
+            {
                 drops.addAll(facing.getDrops(new ItemStack(Material.IRON_PICKAXE)));
-                if (facing.getState() instanceof InventoryHolder) {
+                if (facing.getState() instanceof InventoryHolder)
+                {
                     InventoryHolder holder = (InventoryHolder) facing.getState();
                     ArrayList<ItemStack> items = new ArrayList<ItemStack>(Arrays.asList(holder.getInventory().getContents()));
                     items.removeAll(Arrays.asList("", null));
                     drops.addAll(items);
                 }
                 facing.setTypeIdAndData(0, (byte) 0, true);
-            } else {
+            }
+            else
+            {
                 Machine check = checkBlockMachinePiece(facing);
-                if (check != null) {
+                if (check != null)
+                {
                     check.onMachinePieceBreak(facing);
                 }
                 facing.setTypeIdAndData(0, (byte) 0, true);
@@ -66,12 +78,14 @@ public class MachineBlockBreaker extends Machine {
     }
 
     @Override
-    public List<ItemStack> getDrops() {
+    public List<ItemStack> getDrops()
+    {
         return new ArrayList();
     }
 
     @Override
-    public Recipe getRecipe() {
+    public Recipe getRecipe()
+    {
         ItemStack item = new ItemStack(Material.DISPENSER);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.YELLOW + "Block Breaker");
@@ -88,29 +102,36 @@ public class MachineBlockBreaker extends Machine {
     }
 
     @Override
-    public String getTableName() {
+    public String getTableName()
+    {
         return "BlockBreaker";
     }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return "blockbreaker";
     }
 
     @EventHandler
-    public void onDispenserActivate(BlockDispenseEvent event) {
+    public void onDispenserActivate(BlockDispenseEvent event)
+    {
         Block block = event.getBlock();
-        if (block.getLocation().equals(getLocation())) {
+        if (block.getLocation().equals(getLocation()))
+        {
             event.setCancelled(true);
             run();
         }
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+    public void onPlayerInteract(PlayerInteractEvent event)
+    {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
+        {
             ItemStack item = event.getItem();
-            if (event.getClickedBlock() != null && event.getClickedBlock().getLocation().equals(getLocation()) && (item == null || item != null && !item.getType().isBlock() && item.getType() != Material.REDSTONE || !event.getPlayer().isSneaking())) {
+            if (event.getClickedBlock() != null && event.getClickedBlock().getLocation().equals(getLocation()) && (item == null || item != null && !item.getType().isBlock() && item.getType() != Material.REDSTONE || !event.getPlayer().isSneaking()))
+            {
                 event.setCancelled(true);
             }
         }

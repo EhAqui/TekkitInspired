@@ -22,13 +22,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class MachineMiningWell extends MachineWithInventory {
+public class MachineMiningWell extends MachineWithInventory
+{
     @DatabaseObject
     private int height;
     @DatabaseObject
     private long fuelDuration;
 
-    public MachineMiningWell(Tekkit plugin) {
+    public MachineMiningWell(Tekkit plugin)
+    {
         super(plugin, "Mining Well", 9);
     }
 
@@ -37,10 +39,12 @@ public class MachineMiningWell extends MachineWithInventory {
      *
      * @return whether the machine's fuel duration was refreshed
      */
-    private boolean checkForFuel() {
+    private boolean checkForFuel()
+    {
         ArrayList<ItemStack> items = new ArrayList(Arrays.asList(getInventory().getContents()));
         Optional<ItemStack> optional = items.stream().filter(item -> item != null && Fuel.FUELS.containsKey(item.getType())).findFirst();
-        if (optional.isPresent()) {
+        if (optional.isPresent())
+        {
             ItemStack item = optional.get();
             fuelDuration = (long) (Fuel.FUELS.get(item.getType()).getDuration() / 2.5);
             getInventory().removeItem(new ItemStack(item.getType(), 1, item.getDurability()));
@@ -50,11 +54,15 @@ public class MachineMiningWell extends MachineWithInventory {
     }
 
     @Override
-    public void runMachine() {
+    public void runMachine()
+    {
         Location location = getLocation().clone().subtract(0, height + 1, 0);
-        if (location.getBlock().getType() != Material.BEDROCK && location.getY() > 0) {
-            if (fuelDuration <= 0) {
-                if (!checkForFuel()) {
+        if (location.getBlock().getType() != Material.BEDROCK && location.getY() > 0)
+        {
+            if (fuelDuration <= 0)
+            {
+                if (!checkForFuel())
+                {
                     return;
                 }
             }
@@ -62,11 +70,14 @@ public class MachineMiningWell extends MachineWithInventory {
             height++;
 
             Machine machine = MachinesManager.getMachineByLocation(location);
-            if (machine != null) {
+            if (machine != null)
+            {
                 machine.getDrops().forEach(drop -> routeItem(BlockFace.UP, drop));
                 routeItem(BlockFace.UP, machine.getRecipe().getResult());
                 machine.destroy(false);
-            } else if (!location.getBlock().hasMetadata("machine")) {
+            }
+            else if (!location.getBlock().hasMetadata("machine"))
+            {
                 location.getBlock().getDrops().forEach(drop -> routeItem(BlockFace.UP, drop));
             }
             location.getBlock().setType(Material.COBBLE_WALL);
@@ -77,12 +88,16 @@ public class MachineMiningWell extends MachineWithInventory {
     }
 
     @Override
-    public void onEnable() {
+    public void onEnable()
+    {
         this.updateTask(20);
-        if (height > 0) {
-            for (int i = 1; i <= height; ++i) {
+        if (height > 0)
+        {
+            for (int i = 1; i <= height; ++i)
+            {
                 Location location = getLocation().clone().subtract(0, i, 0);
-                if (location.getBlock().getType() == Material.COBBLE_WALL) {
+                if (location.getBlock().getType() == Material.COBBLE_WALL)
+                {
                     location.getBlock().setMetadata("machine", new FixedMetadataValue(getPlugin(), this));
                 }
             }
@@ -90,7 +105,8 @@ public class MachineMiningWell extends MachineWithInventory {
     }
 
     @Override
-    public Recipe getRecipe() {
+    public Recipe getRecipe()
+    {
         ItemStack item = new ItemStack(Material.IRON_BLOCK);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.YELLOW + "Mining Well");
@@ -107,12 +123,14 @@ public class MachineMiningWell extends MachineWithInventory {
     }
 
     @Override
-    public String getTableName() {
+    public String getTableName()
+    {
         return "MiningWell";
     }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return "miningwell";
     }
 }

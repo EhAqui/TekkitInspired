@@ -19,34 +19,43 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class MachineCropomatic extends MachineWithInventory {
+public class MachineCropomatic extends MachineWithInventory
+{
     private Location corner1;
     private Location corner2;
 
     private ArrayList<Location> queue = new ArrayList<Location>();
 
-    public MachineCropomatic(Tekkit plugin) {
+    public MachineCropomatic(Tekkit plugin)
+    {
         super(plugin, "Crop-o-matic", 9 * 3);
 
-        for (int i = 0; i < BlockFace.values().length; ++i) {
+        for (int i = 0; i < BlockFace.values().length; ++i)
+        {
             BlockFace face = BlockFace.values()[i];
-            if (!face.name().contains("_") && face != BlockFace.SELF) {
+            if (!face.name().contains("_") && face != BlockFace.SELF)
+            {
                 this.acceptableOutputs[i] = true;
             }
         }
     }
 
     @Override
-    public void runMachine() {
+    public void runMachine()
+    {
         Iterator<Location> iterator = this.queue.iterator();
-        while (iterator.hasNext()) {
+        while (iterator.hasNext())
+        {
             Location location = iterator.next();
             Block block = location.getBlock();
             Material type = block.getType();
 
-            if (type == Material.CROPS) {
-                if (block.getData() == (byte) 7) {
-                    if (InventoryUtils.canFitIntoInventory(getInventory(), new ItemStack(Material.SEEDS))) {
+            if (type == Material.CROPS)
+            {
+                if (block.getData() == (byte) 7)
+                {
+                    if (InventoryUtils.canFitIntoInventory(getInventory(), new ItemStack(Material.SEEDS)))
+                    {
                         routeCrop(block);
                         iterator.remove();
                     }
@@ -56,25 +65,33 @@ public class MachineCropomatic extends MachineWithInventory {
     }
 
     @Override
-    public void onEnable() {
+    public void onEnable()
+    {
         updateTask(20);
 
         corner1 = this.getLocation().clone().add(10, 10, 10);
         corner2 = this.getLocation().clone().subtract(10, 10, 10);
         CommonUtils.minMaxCorners(corner1, corner2);
 
-        for (int x = corner1.getBlockX(); x <= corner2.getBlockX(); x++) {
-            for (int y = corner1.getBlockY(); y <= corner2.getBlockY(); y++) {
-                for (int z = corner1.getBlockZ(); z <= corner2.getBlockZ(); z++) {
+        for (int x = corner1.getBlockX(); x <= corner2.getBlockX(); x++)
+        {
+            for (int y = corner1.getBlockY(); y <= corner2.getBlockY(); y++)
+            {
+                for (int z = corner1.getBlockZ(); z <= corner2.getBlockZ(); z++)
+                {
                     Location location = new Location(getWorld(), x, y, z);
                     Block block = location.getBlock();
                     Material type = block.getType();
 
-                    if (type == Material.CROPS) {
-                        if (block.getData() == (byte) 7) {
+                    if (type == Material.CROPS)
+                    {
+                        if (block.getData() == (byte) 7)
+                        {
                             queue.add(location);
                         }
-                    } else if (type == Material.MELON_BLOCK || type == Material.PUMPKIN) {
+                    }
+                    else if (type == Material.MELON_BLOCK || type == Material.PUMPKIN)
+                    {
                         queue.add(location);
                     }
                 }
@@ -83,7 +100,8 @@ public class MachineCropomatic extends MachineWithInventory {
     }
 
     @Override
-    public Recipe getRecipe() {
+    public Recipe getRecipe()
+    {
         ItemStack item = new ItemStack(Material.IRON_BLOCK);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.YELLOW + "Crop-o-matic");
@@ -100,34 +118,46 @@ public class MachineCropomatic extends MachineWithInventory {
     }
 
     @Override
-    public String getTableName() {
+    public String getTableName()
+    {
         return "Cropomatic";
     }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return "cropomatic";
     }
 
     @EventHandler
-    public void onStructureGrow(BlockGrowEvent event) {
+    public void onStructureGrow(BlockGrowEvent event)
+    {
         Block block = event.getBlock();
         BlockState newState = event.getNewState();
 
-        if (block.getLocation().toVector().isInAABB(corner1.toVector(), corner2.toVector())) {
-            if (block.getType() == Material.CROPS) {
-                if (event.getNewState().getRawData() == (byte) 7) {
-                    if (InventoryUtils.canFitIntoInventory(this.getInventory(), new ItemStack(Material.SEEDS))) {
+        if (block.getLocation().toVector().isInAABB(corner1.toVector(), corner2.toVector()))
+        {
+            if (block.getType() == Material.CROPS)
+            {
+                if (event.getNewState().getRawData() == (byte) 7)
+                {
+                    if (InventoryUtils.canFitIntoInventory(this.getInventory(), new ItemStack(Material.SEEDS)))
+                    {
                         event.setCancelled(true);
                         block.setData((byte) 7);
                         routeCrop(block);
-                    } else {
-                        if (!queue.contains(block.getLocation())) {
+                    }
+                    else
+                    {
+                        if (!queue.contains(block.getLocation()))
+                        {
                             queue.add(block.getLocation());
                         }
                     }
                 }
-            } else if (newState.getType() == Material.MELON_BLOCK || newState.getType() == Material.PUMPKIN) {
+            }
+            else if (newState.getType() == Material.MELON_BLOCK || newState.getType() == Material.PUMPKIN)
+            {
                 event.setCancelled(true);
                 block.setType(newState.getType());
                 routeCrop(newState.getBlock());
@@ -135,17 +165,20 @@ public class MachineCropomatic extends MachineWithInventory {
         }
     }
 
-    private void routeCrop(Block block) {
+    private void routeCrop(Block block)
+    {
         Bukkit.getScheduler().runTaskLater(getPlugin(), new UpdateCropTask(this, block), 10);
     }
 
-    private class UpdateCropTask implements Runnable {
+    private class UpdateCropTask implements Runnable
+    {
         private MachineCropomatic machine;
         private Block block;
         private Material originalType;
         private byte data;
 
-        private UpdateCropTask(MachineCropomatic machine, Block block) {
+        private UpdateCropTask(MachineCropomatic machine, Block block)
+        {
             this.machine = machine;
             this.block = block;
             originalType = block.getType();
@@ -153,8 +186,10 @@ public class MachineCropomatic extends MachineWithInventory {
         }
 
         @Override
-        public void run() {
-            if (block.getType() != originalType || block.getData() != data) {
+        public void run()
+        {
+            if (block.getType() != originalType || block.getData() != data)
+            {
                 return;
             }
 
@@ -162,7 +197,8 @@ public class MachineCropomatic extends MachineWithInventory {
             Collection<ItemStack> drops = block.getDrops();
 
             block.setTypeIdAndData(0, (byte) 0, true);
-            switch (type) {
+            switch (type)
+            {
                 case CROPS:
                     drops.add(new ItemStack(Material.SEEDS));
                     block.setType(Material.CROPS);
@@ -170,10 +206,14 @@ public class MachineCropomatic extends MachineWithInventory {
             }
             block.getWorld().playEffect(block.getLocation(), Effect.SMOKE, (byte) 4);
 
-            drops.forEach(drop -> {
-                if (drop.getType() == Material.SEEDS) {
+            drops.forEach(drop ->
+            {
+                if (drop.getType() == Material.SEEDS)
+                {
                     machine.getInventory().addItem(drop);
-                } else {
+                }
+                else
+                {
                     machine.routeItem(BlockFace.UP, drop);
                 }
             });

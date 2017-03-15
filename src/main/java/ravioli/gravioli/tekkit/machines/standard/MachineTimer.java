@@ -20,16 +20,19 @@ import ravioli.gravioli.tekkit.machines.Machine;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MachineTimer extends Machine {
+public class MachineTimer extends Machine
+{
     private int delay = 1;
     private int facing;
 
-    public MachineTimer(Tekkit plugin) {
+    public MachineTimer(Tekkit plugin)
+    {
         super(plugin);
     }
 
     @Override
-    public void onEnable() {
+    public void onEnable()
+    {
         this.updateTask(5 * delay);
 
         Diode diode = (Diode) getBlock().getState().getData();
@@ -39,12 +42,16 @@ public class MachineTimer extends Machine {
     }
 
     @Override
-    public void runMachine() {
-        facing = facing == 3? 0 : facing + 1;
+    public void runMachine()
+    {
+        facing = facing == 3 ? 0 : facing + 1;
         this.getBlock().setTypeIdAndData(Material.DIODE_BLOCK_ON.getId(), (byte) (facing + 4 * (delay - 1)), true);
-        new BukkitRunnable() {
-            public void run() {
-                if (getBlock().getType() == Material.DIODE_BLOCK_ON) {
+        new BukkitRunnable()
+        {
+            public void run()
+            {
+                if (getBlock().getType() == Material.DIODE_BLOCK_ON)
+                {
                     getBlock().setTypeIdAndData(Material.DIODE_BLOCK_OFF.getId(), (byte) (facing + 4 * (delay - 1)), true);
                 }
             }
@@ -52,12 +59,14 @@ public class MachineTimer extends Machine {
     }
 
     @Override
-    public List<ItemStack> getDrops() {
+    public List<ItemStack> getDrops()
+    {
         return new ArrayList();
     }
 
     @Override
-    public Recipe getRecipe() {
+    public Recipe getRecipe()
+    {
         ItemStack item = new ItemStack(Material.DIODE);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.YELLOW + "Redstone Timer");
@@ -73,21 +82,25 @@ public class MachineTimer extends Machine {
     }
 
     @Override
-    public String getTableName() {
+    public String getTableName()
+    {
         return "RedstoneTimer";
     }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return "timer";
     }
 
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
+    public void onPlayerInteract(PlayerInteractEvent event)
+    {
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK &&
                 event.getClickedBlock() != null &&
                 !event.getPlayer().isSneaking() &&
-                event.getClickedBlock().getLocation().equals(this.getLocation())) {
+                event.getClickedBlock().getLocation().equals(this.getLocation()))
+        {
             event.setCancelled(true);
             delay = (delay == 4 ? 1 : delay + 1);
             getBlock().setData((byte) (4 * (delay - 1) + facing));
@@ -96,15 +109,19 @@ public class MachineTimer extends Machine {
     }
 
     @EventHandler
-    public void onBlockRedstone(BlockRedstoneEvent event) {
-        if (event.getBlock().getLocation().equals(getLocation())) {
+    public void onBlockRedstone(BlockRedstoneEvent event)
+    {
+        if (event.getBlock().getLocation().equals(getLocation()))
+        {
             event.setNewCurrent(1);
         }
     }
 
     @EventHandler
-    public void onBlockFromTo(BlockFromToEvent event) {
-        if (event.getToBlock().getLocation().equals(getLocation())) {
+    public void onBlockFromTo(BlockFromToEvent event)
+    {
+        if (event.getToBlock().getLocation().equals(getLocation()))
+        {
             destroy(true);
         }
     }

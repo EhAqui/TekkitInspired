@@ -16,23 +16,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-public class MachineWorldAnchor extends Machine {
-    public MachineWorldAnchor(Tekkit plugin) {
+public class MachineWorldAnchor extends Machine
+{
+    public MachineWorldAnchor(Tekkit plugin)
+    {
         super(plugin);
     }
 
     @Override
-    public void runMachine() {
+    public void runMachine()
+    {
 
     }
 
     @Override
-    public List<ItemStack> getDrops() {
+    public List<ItemStack> getDrops()
+    {
         return new ArrayList();
     }
 
     @Override
-    public Recipe getRecipe() {
+    public Recipe getRecipe()
+    {
         ItemStack item = new ItemStack(Material.OBSIDIAN);
         ItemMeta itemMeta = item.getItemMeta();
         itemMeta.setDisplayName(ChatColor.YELLOW + "World Anchor");
@@ -48,21 +53,25 @@ public class MachineWorldAnchor extends Machine {
     }
 
     @Override
-    public String getTableName() {
+    public String getTableName()
+    {
         return "WorldAnchor";
     }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return "worldanchor";
     }
 
     @EventHandler
-    public void onChunkUnload(ChunkUnloadEvent event) {
+    public void onChunkUnload(ChunkUnloadEvent event)
+    {
         Chunk machineChunk = getBlock().getChunk();
         Chunk chunk = event.getChunk();
 
-        if (Math.hypot(chunk.getX() - machineChunk.getX(), chunk.getZ() - machineChunk.getZ()) <= 3) {
+        if (Math.hypot(chunk.getX() - machineChunk.getX(), chunk.getZ() - machineChunk.getZ()) <= 3)
+        {
             event.setCancelled(true);
         }
     }

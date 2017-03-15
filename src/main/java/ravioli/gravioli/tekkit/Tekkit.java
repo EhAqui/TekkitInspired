@@ -25,9 +25,8 @@ import java.util.UUID;
 
 public class Tekkit extends JavaPlugin
 {
-    private Sqlite sqlite;
-
     public static boolean AUTO_EQUIP;
+    private Sqlite sqlite;
 
     @Override
     public void onLoad()
