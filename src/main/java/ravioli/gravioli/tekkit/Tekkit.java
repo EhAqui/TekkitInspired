@@ -23,18 +23,21 @@ import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class Tekkit extends JavaPlugin {
+public class Tekkit extends JavaPlugin
+{
     private Sqlite sqlite;
 
     public static boolean AUTO_EQUIP;
 
     @Override
-    public void onLoad() {
+    public void onLoad()
+    {
         sqlite = new Sqlite(this);
     }
 
     @Override
-    public void onEnable() {
+    public void onEnable()
+    {
         setupConfig();
 
         registerListener(new MachineListeners(this));
@@ -60,16 +63,20 @@ public class Tekkit extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() {
-        try {
+    public void onDisable()
+    {
+        try
+        {
             MachinesManager.getMachines().forEach(Machine::save);
             sqlite.getConnection().close();
-        } catch (SQLException e) {
+        } catch (SQLException e)
+        {
             e.printStackTrace();
         }
     }
 
-    private void setupConfig() {
+    private void setupConfig()
+    {
         FileConfiguration config = this.getConfig();
         config.addDefault("auto-equip", true);
         config.options().copyDefaults(true);
@@ -83,8 +90,10 @@ public class Tekkit extends JavaPlugin {
      *
      * @param listeners Listeners to register
      */
-    public void registerListener(Listener... listeners) {
-        for (Listener listener : listeners) {
+    public void registerListener(Listener... listeners)
+    {
+        for (Listener listener : listeners)
+        {
             this.getServer().getPluginManager().registerEvents(listener, this);
         }
     }
@@ -94,14 +103,17 @@ public class Tekkit extends JavaPlugin {
      *
      * @param command The command to register
      */
-    public void registerCommand(ravioli.gravioli.tekkit.commands.Command command) {
+    public void registerCommand(ravioli.gravioli.tekkit.commands.Command command)
+    {
         CommandMap commandMap = null;
-        try {
+        try
+        {
             Field field = SimplePluginManager.class.getDeclaredField("commandMap");
             field.setAccessible(true);
             commandMap = (CommandMap) field.get(this.getServer().getPluginManager());
             commandMap.register(this.getName(), command);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e)
+        {
             e.printStackTrace();
         }
     }
@@ -111,7 +123,8 @@ public class Tekkit extends JavaPlugin {
      *
      * @return sqlite manager
      */
-    public Sqlite getSqlite() {
+    public Sqlite getSqlite()
+    {
         return sqlite;
     }
 }

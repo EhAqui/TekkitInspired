@@ -467,6 +467,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/TekkitInspired.iml" filepath="$PROJECT_DIR$/.idea/modules/TekkitInspired.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TekkitInspired_main.iml" filepath="$PROJECT_DIR$/.idea/modules/TekkitInspired_main.iml" group="TekkitInspired" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TekkitInspired_test.iml" filepath="$PROJECT_DIR$/.idea/modules/TekkitInspired_test.iml" group="TekkitInspired" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
